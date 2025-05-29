@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Roleta de Filmes</title>
+  <link rel="icon" type="image/png" href="img/filmes.ico">
+  
+  <style>
+  :root {
+    --tema-escuro: linear-gradient(120deg, #140101, #3B0000, #6d2424, #942d2d);
+    --tema-claro: linear-gradient(160deg, #0079FF, #00DFA2, #F6FA70, #FF0060);
+    --tema-personalizado: linear-gradient(160deg, #E55050, #732255, #007074, #0D4715);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Arial', sans-serif;
+    background: var(--tema-escuro) !important;
+    background-color: #140101 !important;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding-top: 20px;
+    transition: background 0.5s;
+  }
+
+  body.light-theme {
+    background: var(--tema-claro) !important;
+    color: #222;
+  }
+  body.light-theme h1 {
+    color: #82121B;
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+  }
+  body.light-theme .movie-card,
+  body.light-theme .movie-selector {
+    background: #fff;
+    color: #222;
+    border-color: #82121B;
+  }
+  body.light-theme #result {
+    color: #82121B;
+    text-shadow: 0 0 5px #fff;
+  }
+  body.light-theme #movie-result span {
+    color: #82121B;
+  }
+
+  body.custom-theme {
+    background: var(--tema-personalizado) !important;
+    color: #fff;
+  }
+
+  /* Botões gerais */
+  button, .dropdown-button {
+    padding: 15px 25px;
+    font-size: 1.2rem;
+    margin: 10px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: linear-gradient(45deg, #5f490b, #e4b942);
+    color: white;
+    box-shadow: 0 0 5px #fff, 0 0 10px #fff;
+    transition: transform 0.1s, box-shadow 0.3s, background 0.3s;
+    min-width: 200px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.2;
+  }
+  button:hover, .dropdown-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px #fff, 0 0 15px #fff;
+    background: linear-gradient(45deg, #ff80ab, #f06292);
+    color: #fff;
+  }
+  button:disabled {
+    background: #666;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Botão de assistido */
+  .watched-button {
+    padding: 10px 15px;
+    font-size: 1rem;
+    background: linear-gradient(45deg, #FF4081, #F50057);
+    margin-top: 10px;
+    min-width: 120px;
+  }
+  .watched-button.watched {
+    background: #666;
+  }
+
+  /* Container dos botões abaixo da roleta */
+  #roulette-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  #spinButton {
+    margin-top: 25px;
+    margin-bottom: 15px;
+  }
+
+  /* Container principal centralizado */
+  .container {
+    text-align: center;
+    padding: 15px;
+    max-width: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: opacity 0.5s ease;
+    padding-top: 80px;
+  }
+
+  h1 {
+    font-size: 2rem;
+    margin-top: 20px;
+    margin-bottom: 25px;
+    color: #FFC107;
+    text-shadow: 0 0 5px #FFC107, 0 0 10px #FFC107;
+  }
+
+  /* Roleta */
+  #roulette-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    transition: opacity 0.3s ease;
+  }
+  #roulette {
+    width: 480px;
+    height: 480px;
+    margin: 20px auto;
+    display: block;
+    background: transparent;
+  }
+
+  /* Movie selector */
+  #movie-selector-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+  .movie-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    background-color: #333;
+    padding: 20px;
+    border-radius: 10px;
+    border: 3px solid #00E676;
+    transition: opacity 0.3s ease;
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .movie-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #222;
+    padding: 15px;
+    border-radius: 8px;
+    border: 3px solid #00E676;
+    max-width: 350px;
+    width: 100%;
+    transition: transform 0.2s, box-shadow 0.3s;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+  .movie-card.selected {
+    box-shadow: 0 0 15px #00E676, 0 0 25px #00E676;
+    transform: scale(1.02);
+  }
+  .movie-info {
+    text-align: center;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .movie-info h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #00E676;
+  }
+  .movie-info p {
+    font-size: 1rem;
+    color: #ccc;
+    margin: 8px 0;
+  }
+  .movie-info.spinning {
+    animation: movieFade 0.2s linear infinite;
+  }
+  @keyframes movieFade {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+
+  /* Resultado do gênero sorteado */
+  #result {
+    margin: 20px 0;
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-shadow: 0 0 5px #D9AE62;
+    color: #D9AE62;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Resultado do filme sorteado */
+  #movie-result {
+    margin: 20px 0;
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-shadow: 0 0 5px #046837;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #movie-result span {
+    color: #00E676;
+  }
+
+  /* Navegação */
+  .navigation-main {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1001;
+    background: rgba(20,1,1,0.98);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  }
+  .menu-nav {
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    background: rgba(20,1,1,0.98);
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    z-index: 1002;
+    border-bottom: 2px solid #82121B;
+  }
+  .list {
+    list-style: none;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+  .item {
+    width: 100%;
+    border-bottom: 1px solid #333;
+    padding: 0;
+    margin: 0;
+  }
+  .link, .dropdown-button {
+    display: block;
+    width: 100%;
+    padding: 16px 24px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1rem;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .link:hover, .dropdown-button:hover {
+    background: #82121B;
+    color: #FFC107;
+  }
+
+  /* Hamburger menu */
+  .input {
+    display: none;
+  }
+  .label {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    margin: 0 10px;
+    position: relative;
+    z-index: 1003;
+  }
+  .span,
+  .span::before,
+  .span::after {
+    display: block;
+    background: #fff;
+    height: 4px;
+    width: 32px;
+    border-radius: 2px;
+    position: absolute;
+    transition: all 0.3s;
+    content: '';
+  }
+  .span {
+    top: 23px;
+    left: 9px;
+  }
+  .span::before {
+    content: '';
+    top: -10px;
+    left: 0;
+    position: absolute;
+    width: 32px;
+    height: 4px;
+    background: #fff;
+    border-radius: 2px;
+  }
+  .span::after {
+    content: '';
+    top: 10px;
+    left: 0;
+    position: absolute;
+    width: 32px;
+    height: 4px;
+    background: #fff;
+    border-radius: 2px;
+  }
+  .input:checked + .label .span {
+    background: transparent;
+  }
+  .input:checked + .label .span::before {
+    transform: translateY(10px) rotate(45deg);
+  }
+  .input:checked + .label .span::after {
+    transform: translateY(-10px) rotate(-45deg);
+  }
+  .input:checked ~ .menu-nav {
+    display: flex;
+  }
+
+  /* Dropdown */
+  .dropdown {
+    position: relative;
+    width: 100%;
+  }
+  .dropdown-content {
+    display: none;
+    position: static;
+    background: #222;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    min-width: 100%;
+    z-index: 1004;
+    margin: 0;
+    padding: 0;
+  }
+  .dropdown.active .dropdown-content {
+    display: block;
+  }
+  .dropdown-content a {
+    color: #fff;
+    padding: 12px 32px;
+    text-decoration: none;
+    display: block;
+    font-size: 1rem;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    transition: background 0.2s;
+  }
+  .dropdown-content a:hover {
+    background: #D9AE62;
+    color: #222;
+  }
+
+  /* Theme select style */
+  #theme-toggle {
+    margin: 8px 0 8px 16px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #82121B;
+    background: #222;
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+    transition: background 0.2s;
+  }
+  body.light-theme #theme-toggle {
+    background: #fff;
+    color: #222;
+    border: 1px solid #82121B;
+  }
+
+  /* Responsividade */
+  @media (max-width: 600px) {
+    .label {
+      width: 40px;
+      height: 40px;
+    }
+    .span, .span::before, .span::after {
+      width: 24px;
+      height: 3px;
+    }
+    .span {
+      top: 18px;
+      left: 7px;
+    }
+    .span::before { top: -8px; }
+    .span::after { top: 8px; }
+    .menu-nav {
+      top: 45px;
+    }
+    .link, .dropdown-button {
+      padding: 12px 16px;
+      font-size: 0.95rem;
+    }
+    .dropdown-content a {
+      padding: 10px 20px;
+      font-size: 0.95rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    h1 {
+      font-size: 1.6rem;
+    }
+    .container {
+      padding-top: 80px;
+    }
+    #roulette-container {
+      width: 100%;
+      padding: 0 15px;
+    }
+    #roulette {
+      width: 260px;
+      height: 260px;
+    }
+    button, .dropdown-button {
+      padding: 10px 15px;
+      font-size: 1rem;
+      min-width: 140px;
+    }
+    .movie-selector {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 350px;
+      padding: 15px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #movie-selector-container {
+      align-items: center;
+      justify-content: center;
+    }
+    #result, #movie-result {
+      font-size: 1.5rem;
+    }
+  }
+
+  footer a {
+    color: #00E676;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  footer a:hover {
+    text-decoration: underline;
+  }
+</style>
+
+</head>
+<body>
+  <div class="navigation-main">
+    <input class="input" type="checkbox" id="menuToggle">
+    <label class="label" for="menuToggle">
+      <span class="span"></span>
+    </label>
+    <nav class="menu-nav">
+      <ul class="list">
+        <li class="item">
+          <a class="link" href="https://gedeaob.github.io/Gedeaob-gedeao.stefhany/index.html">Home</a>
+        </li>
+        <li class="item">
+          <label class="link" for="theme-toggle">Tema</label>
+          <select id="theme-toggle" aria-label="Selecionar tema">
+            <option value="dark">Escuro</option>
+            <option value="light">Claro</option>
+            <option value="custom">Personalizado</option>
+          </select>
+        </li>
+        <li class="item dropdown">
+          <button class="dropdown-button" aria-haspopup="true" aria-expanded="false">Escolher Gênero</button>
+          <div class="dropdown-content" id="genre-dropdown" role="menu"></div>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="container">
+    <h1>Escolha o Filme Perfeito!</h1>
+    <div id="roulette-container" role="region" aria-label="Roleta de gêneros">
+      <canvas id="roulette" width="480" height="480" aria-hidden="true"></canvas>
+      <div class="arrow" aria-hidden="true"></div>
+      <button id="spinButton" aria-label="Girar a roleta">Girar</button>
+      <div id="result" aria-live="polite"></div>
+      <div id="roulette-buttons" style="display: none;">
+        <button id="spinAgain" aria-label="Girar a roleta novamente">Girar Novamente</button>
+        <button id="seeMovies" aria-label="Ver filmes do gênero selecionado">Ver Filmes</button>
+      </div>
+    </div>
+
+    <div id="movie-selector-container" style="display: none;" role="region" aria-label="Seletor de filmes">
+      <div class="movie-selector">
+        <div class="movie-card" id="movie-card">
+          <div class="movie-info" id="movie-info">
+            <h3 id="movie-title">Filme</h3>
+            <p id="movie-year"></p>
+            <p id="movie-score"></p>
+            <p id="movie-synopsis"></p>
+            <button id="watched-button" class="watched-button" aria-label="Marcar como já assistido">Já Assistido</button>
+          </div>
+        </div>
+      </div>
+      <button id="spinMovie" aria-label="Sortear um filme">Sortear Filme</button>
+      <div id="movie-result" aria-live="polite"></div>
+      <button id="spinMovieAgain" aria-label="Sortear outro filme">Sortear Novamente</button>
+      <button id="backToRoulette" aria-label="Voltar para a roleta de gêneros">Escolher Outro Gênero</button>
+    </div>
+  </div>
+
+  <footer style="margin-top: 190px; text-align: center;">
+    Desenvolvido por
+    <a href="https://www.instagram.com/gedeao_batista?igsh=ODlkbGFsanE2dmZq" target="_blank">Gedeão Batista</a>
+  </footer>
+
+  <script>
+    const data = {
+      "Comédia romântica": [
+        { titulo: "Todos Menos Você", ano: 2023, sinopse: "Um casal improvável se encontra em uma comédia romântica moderna.", pontuacao: 6.8 },
+        { titulo: "Caçador de Recompensas", ano: 2010, sinopse: "Um caçador de recompensas precisa escoltar sua ex-esposa.", pontuacao: 5.5 }
+      ],
+      "Ação": [
+        { titulo: "Kraven, o Caçador", ano: 2024, sinopse: "Um caçador enfrenta desafios épicos em um mundo selvagem.", pontuacao: 6.5 },
+        { titulo: "Dupla Explosiva", ano: 2017, sinopse: "Um guarda-costas e um assassino formam uma dupla improvável.", pontuacao: 6.9 }
+      ],
+      "Aventura": [
+        { titulo: "Percy Jackson e o Ladrão de Raios", ano: 2010, sinopse: "Um jovem descobre que é um semideus.", pontuacao: 5.9 },
+        { titulo: "Star Trek", ano: 2009, sinopse: "A tripulação da Enterprise enfrenta desafios cósmicos.", pontuacao: 7.9 }
+      ],
+      "Drama": [
+        { titulo: "Pequenas Coisas Como Estas", ano: 2024, sinopse: "Um homem enfrenta dilemas morais em uma pequena cidade.", pontuacao: 7.0 },
+        { titulo: "Casa Grande", ano: 2014, sinopse: "Uma família enfrenta crises financeiras e emocionais.", pontuacao: 6.9 }
+      ],
+      "Comédia de terror": [
+        { titulo: "A Hora do Espanto", ano: 1985, sinopse: "Um adolescente enfrenta um vampiro vizinho.", pontuacao: 7.1 },
+        { titulo: "Dupla Jornada", ano: 2022, sinopse: "Uma babá enfrenta horrores sobrenaturais.", pontuacao: 6.2 }
+      ],
+      "Terror": [
+        { titulo: "Lobisomem", ano: 2010, sinopse: "Um homem enfrenta sua maldição de lobisomem.", pontuacao: 5.8 },
+        { titulo: "Resident Evil", ano: 2002, sinopse: "Uma equipe enfrenta horrores em um laboratório.", pontuacao: 6.6 }
+      ],
+      "Fantasia": [
+        { titulo: "As Crônicas de Nárnia: O Leão, a Feiticeira e o Guarda-Roupa", ano: 2005, sinopse: "Crianças descobrem um mundo mágico.", pontuacao: 6.9 },
+        { titulo: "Harry Potter e a Pedra Filosofal", ano: 2001, sinopse: "Um jovem descobre que é um bruxo.", pontuacao: 7.6 }
+      ],
+      "Filmes de guerra": [
+        { titulo: "O Resgate do Soldado Ryan", ano: 1998, sinopse: "Soldados buscam salvar um companheiro na Segunda Guerra.", pontuacao: 8.6 },
+        { titulo: "Bastardos Inglórios", ano: 2009, sinopse: "Soldados planejam um ataque contra nazistas.", pontuacao: 8.3 }
+      ],
+      "Romance": [
+        { titulo: "Águas Profundas", ano: 2022, sinopse: "Um casamento é testado por jogos psicológicos.", pontuacao: 5.4 },
+        { titulo: "Uma Ideia de Você", ano: 2024, sinopse: "Uma mulher se apaixona por um jovem astro.", pontuacao: 6.4 }
+      ],
+      "Animação": [
+        { titulo: "Up: Altas Aventuras", ano: 2009, sinopse: "Um idoso embarca em uma aventura com balões.", pontuacao: 8.2 },
+        { titulo: "Garfield", ano: 2004, sinopse: "Um gato preguiçoso vive aventuras inesperadas.", pontuacao: 5.0 }
+      ],
+      "Ficção Científica": [
+        { titulo: "Planeta dos Macacos", ano: 2001, sinopse: "Um astronauta cai em um planeta dominado por macacos.", pontuacao: 5.7 },
+        { titulo: "A Origem", ano: 2010, sinopse: "Um ladrão invade sonhos para roubar segredos.", pontuacao: 8.8 }
+      ]
+    };
+
+    const canvas = document.getElementById('roulette');
+    const ctx = canvas.getContext('2d');
+
+    const genres = [
+  "Comédia romântica", "Ação", "Aventura", "Drama", "Comédia de terror",
+  "Terror", "Fantasia", "Filmes de guerra", "Romance", "Animação",
+  "Ficção Científica", "Perdeu a vez"
+];
+    const colors = genres.map((genre, index) => {
+      if (genre === "Perdeu a vez") return '#FF4949';
+      if (genre === "Roda de novo") return '#FFC107';
+      return index % 2 === 0 ? '#82121B' : '#D9AE62';
+    });
+
+    const anglePerSegment = (2 * Math.PI) / genres.length;
+    let currentAngle = 0, isSpinning = false;
+    let selectedGenre = null;
+
+    function populateGenreDropdown() {
+      const dropdown = document.getElementById('genre-dropdown');
+      const validGenres = genres.filter(genre => genre !== 'Perdeu a vez' && genre !== 'Roda de novo');
+      validGenres.forEach(genre => {
+        const link = document.createElement('a');
+        link.href = '#';
+        link.textContent = genre;
+        link.setAttribute('role', 'menuitem');
+        link.setAttribute('aria-label', `Selecionar gênero ${genre}`);
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          selectedGenre = genre;
+          startMovieSelector();
+          document.getElementById('menuToggle').checked = false;
+          toggleDropdown();
+        });
+        dropdown.appendChild(link);
+      });
+    }
+
+    function toggleDropdown() {
+      const dropdown = document.querySelector('.dropdown');
+      const dropdownButton = document.querySelector('.dropdown-button');
+      const isActive = dropdown.classList.toggle('active');
+      dropdownButton.setAttribute('aria-expanded', isActive);
+    }
+
+    document.addEventListener('click', (e) => {
+      const dropdown = document.querySelector('.dropdown');
+      const dropdownButton = document.querySelector('.dropdown-button');
+      if (!dropdown.contains(e.target)) {
+        dropdown.classList.remove('active');
+        dropdownButton.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    document.querySelector('.dropdown-button').addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleDropdown();
+    });
+
+    function drawRoulette(highlightGenre = null) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = canvas.width / 2;
+
+      genres.forEach((genre, index) => {
+        const startAngle = anglePerSegment * index + currentAngle;
+        const endAngle = startAngle + anglePerSegment;
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.fillStyle = highlightGenre && genre !== highlightGenre ? '#444' : colors[index];
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(startAngle + anglePerSegment / 2);
+
+        // Troca a cor e o tamanho da fonte para "Perdeu a vez"
+        if (genre === "Perdeu a vez") {
+          ctx.fillStyle = '#fff200'; // Amarelo
+          ctx.font = 'bold 25px Arial'; // Fonte maior e em negrito
+        } else {
+          ctx.fillStyle = '#fff';
+          ctx.font = '20px Arial';
+        }
+
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        const lines = genre.split('\n');
+        const lineHeight = genre === "Perdeu a vez" ? 28 : 20;
+        lines.forEach((line, i) => {
+          ctx.fillText(line, radius - 15, i * lineHeight - (lines.length - 1) * lineHeight / 2);
+        });
+        ctx.restore();
+      });
+    }
+
+    function bumpArrow() {
+      const arrow = document.querySelector('.arrow');
+      arrow.classList.add('bumping');
+      setTimeout(() => arrow.classList.remove('bumping'), 200);
+    }
+
+    function spinRoulette() {
+      if (isSpinning) return;
+      isSpinning = true;
+      document.getElementById('spinButton').disabled = true;
+      document.getElementById('roulette-buttons').style.display = 'none';
+      document.getElementById('result').textContent = '';
+
+      const spinDuration = 10000;
+      const maxSpeed = 0.5;
+      const accelerationTime = 1000;
+      const decelerationTime = 10000;
+      const extraRotations = Math.floor(Math.random() * 5) + 5;
+      const winningIndex = Math.floor(Math.random() * genres.length);
+      const targetAngle = extraRotations * 2 * Math.PI + (winningIndex * anglePerSegment);
+
+      let startTime = null;
+
+      function animateSpin(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+
+        let speed;
+        if (elapsed < accelerationTime) {
+          speed = (elapsed / accelerationTime) * maxSpeed;
+        } else if (elapsed < spinDuration - decelerationTime) {
+          speed = maxSpeed;
+        } else if (elapsed < spinDuration) {
+          speed = maxSpeed * ((spinDuration - elapsed) / decelerationTime);
+        } else {
+          speed = 0;
+          isSpinning = false;
+          document.getElementById('spinButton').disabled = false;
+          currentAngle = targetAngle;
+          showResult(winningIndex);
+          return;
+        }
+
+        currentAngle += speed;
+        drawRoulette();
+        if (isSpinning) requestAnimationFrame(animateSpin);
+      }
+
+      requestAnimationFrame(animateSpin);
+    }
+
+    function showResult(winningIndex) {
+      selectedGenre = genres[winningIndex];
+      currentAngle = winningIndex * anglePerSegment;
+      currentAngle = ((currentAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+
+      bumpArrow();
+      drawRoulette(selectedGenre);
+      document.getElementById('result').textContent = selectedGenre.replace('\n', ' ');
+
+      if (selectedGenre === 'Perdeu a vez') {
+        document.getElementById('result').textContent = 'Oops, perdeu a vez! Gire novamente!';
+        document.getElementById('spinAgain').style.display = 'inline-block';
+        document.getElementById('seeMovies').style.display = 'none';
+        document.getElementById('roulette-buttons').style.display = 'flex';
+      } else if (selectedGenre === 'Roda de novo') {
+        setTimeout(spinRoulette, 1000);
+      } else {
+        document.getElementById('spinAgain').style.display = 'inline-block';
+        document.getElementById('seeMovies').style.display = 'inline-block';
+        document.getElementById('roulette-buttons').style.display = 'flex';
+      }
+    }
+
+    let movieList = [];
+    let isMovieSpinning = false;
+
+    function startMovieSelector() {
+      document.getElementById('roulette-container').style.opacity = '0';
+      document.getElementById('movie-result').textContent = '';
+      setTimeout(() => {
+        document.getElementById('roulette-container').style.display = 'none';
+        document.getElementById('movie-selector-container').style.display = 'flex';
+        document.getElementById('movie-selector-container').style.opacity = '1';
+      }, 500);
+      movieList = data[selectedGenre] || [];
+      if (!movieList.length) {
+        document.getElementById('movie-result').textContent = 'Nenhum filme disponível para este gênero.';
+        return;
+      }
+      spinMovieSelector();
+    }
+
+    function spinMovieSelector() {
+      if (isMovieSpinning || !movieList.length) return;
+      isMovieSpinning = true;
+      document.getElementById('spinMovie').disabled = true;
+      document.getElementById('spinMovieAgain').disabled = true;
+
+      const info = document.getElementById('movie-info');
+      const title = document.getElementById('movie-title');
+      const year = document.getElementById('movie-year');
+      const score = document.getElementById('movie-score');
+      const synopsis = document.getElementById('movie-synopsis');
+      const watchedButton = document.getElementById('watched-button');
+      info.classList.add('spinning');
+
+      const watchedMovies = JSON.parse(localStorage.getItem('watchedMovies') || '[]');
+      let availableMovies = movieList.filter(movie => !watchedMovies.includes(movie.titulo));
+      if (!availableMovies.length) {
+        localStorage.setItem('watchedMovies', '[]');
+        availableMovies = [...movieList];
+      }
+
+      const spinDuration = 6000;
+      const interval = 100;
+      let elapsed = 0;
+
+      const intervalId = setInterval(() => {
+        const randomIndex = Math.floor(Math.random() * availableMovies.length);
+        const movie = availableMovies[randomIndex];
+        title.textContent = movie.titulo;
+        year.textContent = `Ano: ${movie.ano}`;
+        score.textContent = movie.pontuacao ? `Pontuação: ${movie.pontuacao}/10` : '';
+        synopsis.textContent = movie.sinopse;
+        watchedButton.classList.remove('watched');
+        watchedButton.textContent = 'Já Assistido';
+        watchedButton.setAttribute('aria-label', `Marcar ${movie.titulo} como assistido`);
+
+        elapsed += interval;
+
+        if (elapsed >= spinDuration) {
+          clearInterval(intervalId);
+          info.classList.remove('spinning');
+          const card = document.getElementById('movie-card');
+          card.classList.add('selected');
+          const winningIndex = Math.floor(Math.random() * availableMovies.length);
+          const winningMovie = availableMovies[winningIndex];
+          title.textContent = winningMovie.titulo;
+          year.textContent = `Ano: ${winningMovie.ano}`;
+          score.textContent = winningMovie.pontuacao ? `Pontuação: ${winningMovie.pontuacao}/10` : '';
+          synopsis.textContent = winningMovie.sinopse;
+          document.getElementById('movie-result').innerHTML = `Filme escolhido: <span>${winningMovie.titulo}</span>`;
+          watchedButton.classList.toggle('watched', watchedMovies.includes(winningMovie.titulo));
+          watchedButton.textContent = watchedMovies.includes(winningMovie.titulo) ? 'Assistido' : 'Já Assistido';
+          watchedButton.setAttribute('aria-label', `Marcar ${winningMovie.titulo} como assistido`);
+          watchedButton.onclick = () => toggleWatched(winningMovie.titulo);
+          watchedMovies.push(winningMovie.titulo);
+          localStorage.setItem('watchedMovies', JSON.stringify(watchedMovies));
+          isMovieSpinning = false;
+          document.getElementById('spinMovie').disabled = false;
+          document.getElementById('spinMovieAgain').disabled = false;
+        }
+      }, interval);
+    }
+
+    function toggleWatched(title) {
+      const watchedMovies = JSON.parse(localStorage.getItem('watchedMovies') || '[]');
+      const index = watchedMovies.indexOf(title);
+      const watchedButton = document.getElementById('watched-button');
+      if (index === -1) {
+        watchedMovies.push(title);
+        watchedButton.classList.add('watched');
+        watchedButton.textContent = 'Assistido';
+      } else {
+        watchedMovies.splice(index, 1);
+        watchedButton.classList.remove('watched');
+        watchedButton.textContent = 'Já Assistido';
+      }
+      localStorage.setItem('watchedMovies', JSON.stringify(watchedMovies));
+    }
+
+    function backToRoulette() {
+      document.getElementById('movie-selector-container').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('movie-selector-container').style.display = 'none';
+        document.getElementById('roulette-container').style.display = 'block';
+        document.getElementById('roulette-container').style.opacity = '1';
+        document.getElementById('result').textContent = '';
+        document.getElementById('roulette-buttons').style.display = 'none';
+        document.getElementById('menuToggle').checked = false;
+        drawRoulette();
+      }, 500);
+    }
+
+    function setTheme(theme) {
+  document.body.classList.remove('light-theme', 'custom-theme');
+  if (theme === 'light') {
+    document.body.classList.add('light-theme');
+  } else if (theme === 'custom') {
+    document.body.classList.add('custom-theme');
+  }
+  localStorage.setItem('theme', theme);
+
+  // Se quiser manter customizações extras, pode deixar aqui:
+  if (theme === 'custom') {
+    document.documentElement.style.setProperty('--bg-gradient', 'linear-gradient(120deg, #1a237e, #3f51b5, #7986cb, #b3e5fc)');
+    document.documentElement.style.setProperty('--button-bg', 'linear-gradient(45deg, #d81b60, #ff4081)');
+    document.documentElement.style.setProperty('--card-border', '#ff4081');
+    document.documentElement.style.setProperty('--title-color', '#ff4081');
+    document.documentElement.style.setProperty('--title-shadow', '0 0 5px #ff4081, 0 0 10px #ff4081');
+  } else {
+    document.documentElement.style.removeProperty('--bg-gradient');
+    document.documentElement.style.removeProperty('--button-bg');
+    document.documentElement.style.removeProperty('--card-border');
+    document.documentElement.style.removeProperty('--title-color');
+    document.documentElement.style.removeProperty('--title-shadow');
+  }
+}
+
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
+    document.getElementById('theme-toggle').value = savedTheme;
+
+    document.getElementById('theme-toggle').addEventListener('change', (e) => {
+      setTheme(e.target.value);
+      document.getElementById('menuToggle').checked = false;
+    });
+
+    document.getElementById('spinButton').addEventListener('click', spinRoulette);
+    document.getElementById('spinAgain').addEventListener('click', spinRoulette);
+    document.getElementById('seeMovies').addEventListener('click', startMovieSelector);
+    document.getElementById('spinMovie').addEventListener('click', spinMovieSelector);
+    document.getElementById('spinMovieAgain').addEventListener('click', spinMovieSelector);
+    document.getElementById('backToRoulette').addEventListener('click', backToRoulette);
+
+    drawRoulette();
+    populateGenreDropdown();
+  </script>
+</body>
+</html>
