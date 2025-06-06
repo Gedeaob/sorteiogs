@@ -4,504 +4,756 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Roleta de Filmes</title>
-  <link rel="icon" type="image/png" href="img/filmes.ico">
-  
+  <link rel="icon" type="image/png" href="img/film.ico">
   <style>
-  :root {
-    --tema-escuro: linear-gradient(120deg, #140101, #3B0000, #6d2424, #942d2d);
-    --tema-claro: linear-gradient(160deg, #0079FF, #00DFA2, #F6FA70, #FF0060);
-    --tema-personalizado: linear-gradient(160deg, #E55050, #732255, #007074, #0D4715);
-  }
-
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: 'Arial', sans-serif;
-    background: var(--tema-escuro) !important;
-    background-color: #140101 !important;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    overflow-x: hidden;
-    padding-top: 20px;
-    transition: background 0.5s;
-  }
-
-  body.light-theme {
-    background: var(--tema-claro) !important;
-    color: #222;
-  }
-  body.light-theme h1 {
-    color: #82121B;
-    text-shadow: 0 0 5px #fff, 0 0 10px #fff;
-  }
-  body.light-theme .movie-card,
-  body.light-theme .movie-selector {
-    background: #fff;
-    color: #222;
-    border-color: #82121B;
-  }
-  body.light-theme #result {
-    color: #82121B;
-    text-shadow: 0 0 5px #fff;
-  }
-  body.light-theme #movie-result span {
-    color: #82121B;
-  }
-
-  body.custom-theme {
-    background: var(--tema-personalizado) !important;
-    color: #fff;
-  }
-
-  /* Botões gerais */
-  button, .dropdown-button {
-    padding: 15px 25px;
-    font-size: 1.2rem;
-    margin: 10px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    background: linear-gradient(45deg, #5f490b, #e4b942);
-    color: white;
-    box-shadow: 0 0 5px #fff, 0 0 10px #fff;
-    transition: transform 0.1s, box-shadow 0.3s, background 0.3s;
-    min-width: 200px;
-    font-weight: bold;
-    text-align: center;
-    line-height: 1.2;
-  }
-  button:hover, .dropdown-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 10px #fff, 0 0 15px #fff;
-    background: linear-gradient(45deg, #ff80ab, #f06292);
-    color: #fff;
-  }
-  button:disabled {
-    background: #666;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-
-  /* Botão de assistido */
-  .watched-button {
-    padding: 10px 15px;
-    font-size: 1rem;
-    background: linear-gradient(45deg, #FF4081, #F50057);
-    margin-top: 10px;
-    min-width: 120px;
-  }
-  .watched-button.watched {
-    background: #666;
-  }
-
-  /* Container dos botões abaixo da roleta */
-  #roulette-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
-    width: 100%;
-    flex-wrap: wrap;
-  }
-  #spinButton {
-    margin-top: 25px;
-    margin-bottom: 15px;
-  }
-
-  /* Container principal centralizado */
-  .container {
-    text-align: center;
-    padding: 15px;
-    max-width: 100%;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: opacity 0.5s ease;
-    padding-top: 80px;
-  }
-
-  h1 {
-    font-size: 2rem;
-    margin-top: 20px;
-    margin-bottom: 25px;
-    color: #FFC107;
-    text-shadow: 0 0 5px #FFC107, 0 0 10px #FFC107;
-  }
-
-  /* Roleta */
-  #roulette-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    position: relative;
-    transition: opacity 0.3s ease;
-  }
-  #roulette {
-    width: 480px;
-    height: 480px;
-    margin: 20px auto;
-    display: block;
-    background: transparent;
-  }
-
-  /* Movie selector */
-  #movie-selector-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-  }
-  .movie-selector {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 20px 0;
-    background-color: #333;
-    padding: 20px;
-    border-radius: 10px;
-    border: 3px solid #00E676;
-    transition: opacity 0.3s ease;
-    width: 100%;
-    max-width: 400px;
-    box-sizing: border-box;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .movie-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #222;
-    padding: 15px;
-    border-radius: 8px;
-    border: 3px solid #00E676;
-    max-width: 350px;
-    width: 100%;
-    transition: transform 0.2s, box-shadow 0.3s;
-    margin: 0 auto;
-    box-sizing: border-box;
-  }
-  .movie-card.selected {
-    box-shadow: 0 0 15px #00E676, 0 0 25px #00E676;
-    transform: scale(1.02);
-  }
-  .movie-info {
-    text-align: center;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  .movie-info h3 {
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-    color: #00E676;
-  }
-  .movie-info p {
-    font-size: 1rem;
-    color: #ccc;
-    margin: 8px 0;
-  }
-  .movie-info.spinning {
-    animation: movieFade 0.2s linear infinite;
-  }
-  @keyframes movieFade {
-    0%, 100% { opacity: 0.7; }
-    50% { opacity: 1; }
-  }
-
-  /* Resultado do gênero sorteado */
-  #result {
-    margin: 20px 0;
-    font-size: 1.8rem;
-    font-weight: bold;
-    text-shadow: 0 0 5px #D9AE62;
-    color: #D9AE62;
-    min-height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  /* Resultado do filme sorteado */
-  #movie-result {
-    margin: 20px 0;
-    font-size: 1.8rem;
-    font-weight: bold;
-    text-shadow: 0 0 5px #046837;
-    min-height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  #movie-result span {
-    color: #00E676;
-  }
-
-  /* Navegação */
-  .navigation-main {
-    width: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1001;
-    background: rgba(20,1,1,0.98);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-  }
-  .menu-nav {
-    display: none;
-    flex-direction: column;
-    align-items: flex-start;
-    background: rgba(20,1,1,0.98);
-    width: 100%;
-    padding: 0;
-    margin: 0;
-    position: absolute;
-    top: 60px;
-    left: 0;
-    z-index: 1002;
-    border-bottom: 2px solid #82121B;
-  }
-  .list {
-    list-style: none;
-    width: 100%;
-    padding: 0;
-    margin: 0;
-  }
-  .item {
-    width: 100%;
-    border-bottom: 1px solid #333;
-    padding: 0;
-    margin: 0;
-  }
-  .link, .dropdown-button {
-    display: block;
-    width: 100%;
-    padding: 16px 24px;
-    color: #fff;
-    text-decoration: none;
-    font-size: 1rem;
-    background: none;
-    border: none;
-    text-align: left;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .link:hover, .dropdown-button:hover {
-    background: #82121B;
-    color: #FFC107;
-  }
-
-  /* Hamburger menu */
-  .input {
-    display: none;
-  }
-  .label {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-end;
-    width: 50px;
-    height: 50px;
-    cursor: pointer;
-    margin: 0 10px;
-    position: relative;
-    z-index: 1003;
-  }
-  .span,
-  .span::before,
-  .span::after {
-    display: block;
-    background: #fff;
-    height: 4px;
-    width: 32px;
-    border-radius: 2px;
-    position: absolute;
-    transition: all 0.3s;
-    content: '';
-  }
-  .span {
-    top: 23px;
-    left: 9px;
-  }
-  .span::before {
-    content: '';
-    top: -10px;
-    left: 0;
-    position: absolute;
-    width: 32px;
-    height: 4px;
-    background: #fff;
-    border-radius: 2px;
-  }
-  .span::after {
-    content: '';
-    top: 10px;
-    left: 0;
-    position: absolute;
-    width: 32px;
-    height: 4px;
-    background: #fff;
-    border-radius: 2px;
-  }
-  .input:checked + .label .span {
-    background: transparent;
-  }
-  .input:checked + .label .span::before {
-    transform: translateY(10px) rotate(45deg);
-  }
-  .input:checked + .label .span::after {
-    transform: translateY(-10px) rotate(-45deg);
-  }
-  .input:checked ~ .menu-nav {
-    display: flex;
-  }
-
-  /* Dropdown */
-  .dropdown {
-    position: relative;
-    width: 100%;
-  }
-  .dropdown-content {
-    display: none;
-    position: static;
-    background: #222;
-    border-radius: 0;
-    border: none;
-    box-shadow: none;
-    min-width: 100%;
-    z-index: 1004;
-    margin: 0;
-    padding: 0;
-  }
-  .dropdown.active .dropdown-content {
-    display: block;
-  }
-  .dropdown-content a {
-    color: #fff;
-    padding: 12px 32px;
-    text-decoration: none;
-    display: block;
-    font-size: 1rem;
-    background: none;
-    border: none;
-    width: 100%;
-    text-align: left;
-    transition: background 0.2s;
-  }
-  .dropdown-content a:hover {
-    background: #D9AE62;
-    color: #222;
-  }
-
-  /* Theme select style */
-  #theme-toggle {
-    margin: 8px 0 8px 16px;
-    padding: 6px 12px;
-    border-radius: 6px;
-    border: 1px solid #82121B;
-    background: #222;
-    color: #fff;
-    font-size: 1rem;
-    outline: none;
-    transition: background 0.2s;
-  }
-  body.light-theme #theme-toggle {
-    background: #fff;
-    color: #222;
-    border: 1px solid #82121B;
-  }
-
-  /* Responsividade */
-  @media (max-width: 600px) {
-    .label {
-      width: 40px;
-      height: 40px;
+    :root {
+      --tema-escuro: linear-gradient(120deg, #140101, #3B0000, #6d2424, #942d2d);
+      --tema-claro: linear-gradient(160deg, #0079FF, #00DFA2, #F6FA70, #FF0060);
+      --tema-personalizado: linear-gradient(160deg, #E55050, #732255, #007074, #0D4715);
+      --card-bg: #333;
+      --card-border: #00E676;
+      --title-color: #FFC107;
+      --button-bg: linear-gradient(45deg, #5f490b, #e4b942);
+      --button-shadow: 0 0 5px #fff, 0 0 10px #fff;
     }
-    .span, .span::before, .span::after {
-      width: 24px;
-      height: 3px;
-    }
-    .span {
-      top: 18px;
-      left: 7px;
-    }
-    .span::before { top: -8px; }
-    .span::after { top: 8px; }
-    .menu-nav {
-      top: 45px;
-    }
-    .link, .dropdown-button {
-      padding: 12px 16px;
-      font-size: 0.95rem;
-    }
-    .dropdown-content a {
-      padding: 10px 20px;
-      font-size: 0.95rem;
-    }
-  }
 
-  @media (max-width: 480px) {
-    h1 {
-      font-size: 1.6rem;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    .container {
-      padding-top: 80px;
-    }
-    #roulette-container {
-      width: 100%;
-      padding: 0 15px;
-    }
-    #roulette {
-      width: 260px;
-      height: 260px;
-    }
-    button, .dropdown-button {
-      padding: 10px 15px;
-      font-size: 1rem;
-      min-width: 140px;
-    }
-    .movie-selector {
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background: var(--tema-escuro) !important;
+      background-color: #140101 !important;
+      color: #fff;
       display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-top: 80px;
+      transition: background 0.5s;
+    }
+
+    body.light-theme {
+      background: var(--tema-claro) !important;
+      color: #222;
+      --card-bg: #fff;
+      --card-border: #82121B;
+      --title-color: #82121B;
+      --button-bg: linear-gradient(45deg, #007bff, #80d4ff);
+      --button-shadow: 0 0 5px #000, 0 0 10px #000;
+    }
+
+    body.light-theme h1,
+    body.light-theme #result,
+    body.light-theme #movie-result span {
+      color: #82121B;
+      text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+    }
+
+    body.custom-theme {
+      background: var(--tema-personalizado) !important;
+      color: #fff;
+      --card-bg: #333;
+      --card-border: #ff4081;
+      --title-color: #ff4081;
+      --button-bg: linear-gradient(45deg, #d81b60, #ff4081);
+      --button-shadow: 0 0 5px #fff, 0 0 10px #fff;
+    }
+
+    /* =======================
+       Navegação (menu superior)
+       ======================= */
+    .navigation-main {
+      width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1001;
+      background: rgba(20, 1, 1, 0.98);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      height: 60px;
+    }
+
+    .input {
+      display: none;
+    }
+
+    /* Menu hambúrguer: três barras */
+    .label {
+      display: flex;
+      flex-direction: column;
       justify-content: center;
+      align-items: flex-end;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      margin: 0;
+      position: relative;
+      z-index: 1003;
+    }
+
+    .span {
+      position: relative;
+      width: 32px;
+      height: 4px;
+      background: #fff;
+      border-radius: 2px;
+      transition: background 0.3s;
+      display: block;
+    }
+    .span::before,
+    .span::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      width: 32px;
+      height: 4px;
+      background: #fff;
+      border-radius: 2px;
+      transition: transform 0.3s, top 0.3s, opacity 0.3s;
+      display: block;
+    }
+    .span::before {
+      top: -10px;
+    }
+    .span::after {
+      top: 10px;
+    }
+
+    /* Animação do hambúrguer para X */
+    .input:checked + .label .span {
+      background: transparent;
+    }
+    .input:checked + .label .span::before {
+      top: 0;
+      transform: rotate(45deg);
+    }
+    .input:checked + .label .span::after {
+      top: 0;
+      transform: rotate(-45deg);
+    }
+
+    .menu-nav {
+      display: none;
+      flex-direction: column;
+      align-items: flex-start;
+      background: rgba(20, 1, 1, 0.98);
+      width: 100%;
+      padding: 0;
+      margin: 0;
+      position: absolute;
+      top: 60px;
+      left: 0;
+      z-index: 1002;
+      border-bottom: 2px solid #82121B;
+    }
+
+    .input:checked ~ .menu-nav {
+      display: flex;
+    }
+
+    .list {
+      list-style: none;
+      width: 100%;
+      padding: 0;
+    }
+
+    .item {
+      width: 100%;
+      border-bottom: 1px solid #333;
+      padding: 0;
+    }
+
+    .link,
+    .dropdown-button {
+      display: block;
+      width: 100%;
+      padding: 16px 24px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 1rem;
+      background: none;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .link:hover,
+    .dropdown-button:hover {
+      background: #82121B;
+      color: #FFC107;
+    }
+
+    .dropdown {
+      position: relative;
+      width: 100%;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: static;
+      background: #222;
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
+      min-width: 100%;
+      z-index: 1004;
+      margin: 0;
+      padding: 0;
+    }
+
+    .dropdown.active .dropdown-content {
+      display: block;
+    }
+
+    .dropdown-content a {
+      color: #fff;
+      padding: 12px 32px;
+      text-decoration: none;
+      display: block;
+      font-size: 1rem;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+      transition: background 0.2s;
+    }
+
+    .dropdown-content a:hover {
+      background: #D9AE62;
+      color: #222;
+    }
+
+    #theme-toggle {
+      margin: 8px 0 8px 16px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid #82121B;
+      background: #222;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: background 0.2s;
+    }
+
+    body.light-theme #theme-toggle {
+      background: #fff;
+      color: #222;
+      border: 1px solid #82121B;
+    }
+
+    .search-container {
+  position: relative;
+  top: 60px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  z-index: 1000;
+  background: transparent;
+}
+
+    #search-movie {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: 300px;
+      max-width: 80%;
+      font-size: 1rem;
+      background: #222;
+      color: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    #search-movie:focus {
+      border-color: var(--card-border);
+      box-shadow: 0 0 5px var(--card-border);
+    }
+
+    #movie-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #222;
+  color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  z-index: 3000; /* bem alto */
+  width: 300px;
+  max-width: 80%;
+  max-height: 200px;
+  overflow-y: auto;
+  display: none;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+    #movie-suggestions div {
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    #movie-suggestions div:hover {
+      background: #444;
+    }
+
+    #search-movie-btn {
+      padding: 10px 15px;
+      border-radius: 6px;
+      border: none;
+      background: var(--card-border);
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      margin-left: 8px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    #search-movie-btn:hover {
+      background: #0288d1;
+      transform: scale(1.05);
+    }
+
+    .container {
+      text-align: center;
+      padding: 15px;
+      max-width: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: opacity 0.5s ease;
+      padding-top: 120px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-top: 20px;
+      margin-bottom: 25px;
+      color: var(--title-color);
+      text-shadow: 0 0 5px var(--title-color), 0 0 10px var(--title-color);
+    }
+
+    #roulette-container {
+      display: flex;
       flex-direction: column;
       align-items: center;
       width: 100%;
-      max-width: 350px;
-      padding: 15px;
+      position: relative;
+      transition: opacity 0.3s ease;
+    }
+
+    #roulette {
+      width: 480px;
+      height: 480px;
+      margin: 20px auto;
+      display: block;
+      background: transparent;
+    }
+
+    @keyframes bump {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-10px); }
+    }
+
+    button,
+    .dropdown-button {
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: var(--button-bg);
+      color: #fff;
+      box-shadow: var(--button-shadow);
+      transition: transform 0.1s, box-shadow 0.3s, background 0.3s;
+      min-width: 200px;
+      font-weight: bold;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    button:hover,
+    .dropdown-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 10px #fff, 0 0 15px #fff;
+      background: linear-gradient(45deg, #ff80ab, #f06292);
+    }
+
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    #roulette-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    #spinButton {
+      margin-top: 25px;
+      margin-bottom: 15px;
+    }
+
+    #movie-selector-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .movie-selector {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px 0;
+      background-color: var(--card-bg);
+      padding: 20px;
+      border-radius: 10px;
+      border: 3px solid var(--card-border);
+      transition: opacity 0.3s ease;
+      width: 100%;
+      max-width: 400px;
+      box-sizing: border-box;
       margin-left: auto;
       margin-right: auto;
     }
-    #movie-selector-container {
+
+    .movie-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: var(--card-bg);
+      padding: 15px;
+      border-radius: 8px;
+      border: 3px solid var(--card-border);
+      max-width: 350px;
+      width: 100%;
+      transition: transform 0.2s, box-shadow 0.3s;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+
+    .movie-card.selected {
+      box-shadow: 0 0 15px var(--card-border), 0 0 25px var(--card-border);
+      transform: scale(1.02);
+    }
+
+    .movie-info {
+      text-align: center;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
     }
-    #result, #movie-result {
+
+    .movie-info h3 {
       font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: var(--card-border);
     }
-  }
 
-  footer a {
-    color: #00E676;
-    text-decoration: none;
-    font-weight: bold;
-  }
-  footer a:hover {
-    text-decoration: underline;
-  }
-</style>
+    .movie-info p {
+      font-size: 1rem;
+      color: #ccc;
+      margin: 8px 0;
+    }
 
+    .movie-info.spinning {
+      animation: movieFade 0.2s linear infinite;
+    }
+
+    @keyframes movieFade {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    .movie-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 12px;
+      width: 100%;
+    }
+
+    .watched-button {
+      padding: 10px 18px;
+      font-size: 1rem;
+      background: linear-gradient(45deg, #FF4081, #F50057);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      min-width: 120px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .watched-button.watched {
+      background: #666;
+      color: #fff;
+    }
+    .watched-button:hover:not(:disabled) {
+      background: linear-gradient(45deg, #f06292, #ff80ab);
+      transform: scale(1.04);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    }
+
+    .movie-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .copy-title {
+  background: none;
+  border: none;
+  margin-left: 0;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;    /* igual ao ícone */
+  height: 50px;   /* igual ao ícone */
+  overflow: visible; /* ou hidden, ambos funcionam */
+}
+
+.copy-title img {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  box-shadow: 0 0 2px 1px #00E676;
+  background: #181818;
+  border: 1px solid #00E676;
+  padding: 1px;
+  display: block;
+  margin: 0;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+    .copy-title:hover img {
+      transform: scale(1.05);
+      box-shadow: 0 0 2px 1px #00E676;
+      background: #232323;
+    }
+    .copy-title:active img {
+      transform: scale(0.92);
+      box-shadow: 0 0 2px 1px #00E676;
+      background: #181818;
+    }
+
+    #copy-success-msg {
+      margin-left: 0;
+      margin-top: 4px;
+      font-size: 0.95rem;
+      color: #00E676;
+      opacity: 0;
+      transition: opacity 0.2s;
+      align-self: center;
+      display: block;
+      text-align: center;
+    }
+    #copy-success-msg.show {
+      opacity: 1;
+    }
+
+    #result {
+      margin: 20px 0;
+      font-size: 1.8rem;
+      font-weight: bold;
+      text-shadow: 0 0 5px #D9AE62;
+      color: #D9AE62;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #movie-result {
+      margin: 20px 0;
+      font-size: 1.8rem;
+      font-weight: bold;
+      text-shadow: 0 0 5px var(--card-border);
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #movie-result span {
+      color: var(--card-border);
+    }
+
+    @media (max-width: 600px) {
+      .label {
+      width: 40px;
+      height: 40px;
+      }
+
+      .span,
+      .span::before,
+      .span::after {
+      width: 24px;
+      height: 3px;
+      }
+
+      .span {
+      top: 18px;
+      left: 7px;
+      }
+
+      .span::before { top: -8px; }
+      .span::after { top: 8px; }
+
+      .menu-nav {
+      top: 45px;
+      }
+
+      .link,
+      .dropdown-button {
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      }
+
+      .dropdown-content a {
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      }
+
+      .search-container {
+      padding: 8px;
+      }
+
+      #search-movie {
+      width: 250px;
+      font-size: 0.95rem;
+      }
+
+      #movie-suggestions {
+      width: 250px;
+      font-size: 0.95rem;
+      }
+
+      #search-movie-btn {
+      padding: 8px 12px;
+      font-size: 0.95rem;
+      }
+      .movie-actions {
+      gap: 6px;
+      }
+      .copy-title {
+      height: 24px;
+      width: 28px;
+      }
+      .copy-title img {
+      width: 16px;
+      height: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+      font-size: 1.6rem;
+      }
+
+      .container {
+      padding-top: 100px;
+      }
+
+      #roulette-container {
+      width: 100%;
+      padding: 0 15px;
+      }
+
+      #roulette {
+      width: 260px;
+      height: 260px;
+      }
+
+      button,
+      .dropdown-button {
+      padding: 10px 15px;
+      font-size: 1rem;
+      min-width: 140px;
+      }
+
+      .movie-selector {
+      max-width: 350px;
+      padding: 15px;
+      }
+
+      #result,
+      #movie-result {
+      font-size: 1.5rem;
+      }
+
+      #search-movie {
+      width: 200px;
+      font-size: 0.9rem;
+      }
+
+      #movie-suggestions {
+      width: 200px;
+      font-size: 0.9rem;
+      }
+
+      #search-movie-btn {
+      padding: 6px 10px;
+      font-size: 0.9rem;
+      }
+      .movie-actions {
+      gap: 4px;
+      }
+      .copy-title {
+      height: 24px;
+      width: 24px;
+      }
+      .copy-title img {
+      width: 14px;
+      height: 14px;
+      }
+    }
+
+    footer a {
+      color: var(--card-border);
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
   <div class="navigation-main">
@@ -530,8 +782,15 @@
     </nav>
   </div>
 
+  <div class="search-container">
+  <input type="text" id="search-movie" placeholder="Pesquisar filme..." aria-label="Pesquisar filme">
+  <button id="search-movie-btn" aria-label="Buscar filme">Buscar</button>
+  <div id="movie-suggestions"></div>
+</div>
+
   <div class="container">
     <h1>Escolha o Filme Perfeito!</h1>
+    <div id="selected-genre" style="font-size:1.2rem; color:var(--card-border); margin-bottom:10px;"></div>
     <div id="roulette-container" role="region" aria-label="Roleta de gêneros">
       <canvas id="roulette" width="480" height="480" aria-hidden="true"></canvas>
       <div class="arrow" aria-hidden="true"></div>
@@ -551,7 +810,13 @@
             <p id="movie-year"></p>
             <p id="movie-score"></p>
             <p id="movie-synopsis"></p>
-            <button id="watched-button" class="watched-button" aria-label="Marcar como já assistido">Já Assistido</button>
+            <div class="movie-actions">
+  <button id="watched-button" class="watched-button">Já Assistido</button>
+  <button id="copy-title" class="copy-title" aria-label="Copiar título do filme">
+    <img src="img/Copiar.ico" alt="Copiar" />
+  </button>
+  <span id="copy-success-msg"></span>
+</div>
           </div>
         </div>
       </div>
@@ -611,6 +876,7 @@
       { titulo: "John Wick", ano: 2014, sinopse: "Um assassino aposentado busca vingança.", pontuacao: 7.4 },
       { titulo: "Solomon Kane - O Caçador de Demônios", ano: 2009, sinopse: "O mercenário inglês Solomon Kane encontra o Diabo e descobre que sua alma está condenada ao inferno.", pontuacao: 6.9 },
       { titulo: "Mad Max: Estrada da Fúria", ano: 2015, sinopse: "Uma perseguição épica em um mundo pós-apocalíptico.", pontuacao: 8.1 },
+      { titulo: "Pecadores", ano: 2025, sinopse: "Tentando deixar suas vidas problemáticas para trás, dois irmãos gêmeos retornam à sua cidade natal para recomeçar, apenas para descobrir que um mal ainda maior está esperando para recebê-los de volta.", pontuacao: 9.1 },
       { titulo: "John Wick 2: Um Novo Dia para Matar", ano: 2017, sinopse: "Após os acontecimentos do primeiro filme, John Wick 2 apresenta mais personagens e expande o universo da série." },
       { titulo: "John Wick 3: Parabellum", ano: 2019, sinopse: "O terceiro filme da franquia coloca John Wick em fuga, agora perseguido pelos maiores assassinos do mundo." },
       { titulo: "John Wick 4: Baba Yaga", ano: 2023, sinopse: "John Wick enfrenta uma luta brutal contra poderosos inimigos que mobilizam mercenários e assassinos de elite para detê-lo." },
@@ -653,6 +919,7 @@
       { titulo: "Gigantes de Aço", ano: 2011, sinopse: "Em um futuro onde robôs lutam boxe, um ex-boxeador e seu filho encontram um campeão em um robô descartado." },
       { titulo: "A Mulher Rei", ano: 2022, sinopse: "A história das Agojie, uma unidade de guerreiras totalmente femininas que protegiam o Reino Africano do Daomé." },
       { titulo: "Bad Boys I", ano: 1995, sinopse: "Dois detetives de Miami protegem uma testemunha de assassinato enquanto investigam um caso de heroína roubada." },
+      { titulo: "Os Irmãos Grimm", ano: 2005, sinopse: "Dois irmãos viajantes, conhecidos por suas histórias fantásticas, são chamados para investigar uma maldição em uma vila, mas acabam enfrentando forças sobrenaturais reais.", pontuacao: 5.9 },
       { titulo: "Bad Boys II", ano: 2003, sinopse: "Os detetives Burnett e Lowrey investigam o fluxo de ecstasy em Miami." }
     ],
       "Aventura": [
@@ -667,6 +934,7 @@
       { titulo: "Piratas do Caribe: No Fim do Mundo", ano: 2007, sinopse: "Will e Elizabeth unem forças com Barbossa para libertar Jack Sparrow." },
       { titulo: "Piratas do Caribe: Navegando em Águas Misteriosas", ano: 2011, sinopse: "Jack Sparrow busca a Fonte da Juventude e encontra uma mulher de seu passado." },
       { titulo: "Piratas do Caribe: A Vingança de Salazar", ano: 2017, sinopse: "Jack Sparrow é perseguido pelo mortal Capitão Salazar." },
+      { titulo: "Os Irmãos Grimm", ano: 2005, sinopse: "Dois irmãos viajantes, conhecidos por suas histórias fantásticas, são chamados para investigar uma maldição em uma vila, mas acabam enfrentando forças sobrenaturais reais.", pontuacao: 5.9 },
       { titulo: "Solomon Kane - O Caçador de Demônios", ano: 2009, sinopse: "O mercenário inglês Solomon Kane encontra o Diabo e descobre que sua alma está condenada ao inferno.", pontuacao: 6.9 },
       { titulo: "Mad Max: Estrada da Fúria", ano: 2015, sinopse: "Em um mundo pós-apocalíptico, Max ajuda Furiosa a fugir de um tirano." },
       { titulo: "Pantera Negra", ano: 2018, sinopse: "T'Challa retorna a Wakanda para assumir o trono e enfrenta um antigo adversário." },
@@ -796,6 +1064,7 @@
     { titulo: "The Silence", ano: 2019, sinopse: "Família tenta sobreviver a criaturas sensíveis ao som.", pontuacao: 5.3 },
     { titulo: "O Lobisomem", ano: 2010, sinopse: "Remake do clássico sobre maldição de lobisomem.", pontuacao: 5.8 }, 
     { titulo: "Nós", ano: 2019, sinopse: "Família é perseguida por versões sombrias de si mesmos.", pontuacao: 6.9 },
+    { titulo: "Pecadores", ano: 2025, sinopse: "Tentando deixar suas vidas problemáticas para trás, dois irmãos gêmeos retornam à sua cidade natal para recomeçar, apenas para descobrir que um mal ainda maior está esperando para recebê-los de volta.", pontuacao: 9.1 },
     { titulo: "Frankenstein: Entre Anjos e Demônios", ano: 2014, sinopse: "Releitura moderna do monstro de Frankenstein.", pontuacao: 5.1 },
     { titulo: "Depois do Apocalipse", ano: 2024, sinopse: "Sobreviventes enfrentam ameaças após fim do mundo.", pontuacao: 6.0 },
     { titulo: "A Noite Devorou o Mundo", ano: 2018, sinopse: "Homem fica preso em Paris durante apocalipse zumbi.", pontuacao: 6.3 },
@@ -843,6 +1112,7 @@
     { titulo: "O Lar das Crianças Peculiares", ano: 2016, sinopse: "Um jovem explora um mundo de pessoas peculiares.", pontuacao: 6.7 },
     { titulo: "Drácula: A História Nunca Contada", ano: 2014, sinopse: "Releitura da lenda do Conde Drácula.", pontuacao: 6.0 },
     { titulo: "João e Maria: Caçadores de Bruxas", ano: 2013, sinopse: "Irmãos caçam bruxas em um conto sombrio.", pontuacao: 6.1 },
+    { titulo: "Pecadores", ano: 2025, sinopse: "Tentando deixar suas vidas problemáticas para trás, dois irmãos gêmeos retornam à sua cidade natal para recomeçar, apenas para descobrir que um mal ainda maior está esperando para recebê-los de volta.", pontuacao: 9.1 },
     { titulo: "Piratas do Caribe", ano: 2003, sinopse: "Um pirata busca recuperar seu navio.", pontuacao: 8.0 },
     { titulo: "O Senhor dos Anéis: A Sociedade do Anel", ano: 2001, sinopse: "Grupo parte em jornada para destruir um anel mágico.", pontuacao: 8.8 },
     { titulo: "Solomon Kane - O Caçador de Demônios", ano: 2009, sinopse: "O mercenário inglês Solomon Kane encontra o Diabo e descobre que sua alma está condenada ao inferno.", pontuacao: 6.9 },
@@ -883,7 +1153,7 @@
     { titulo: "O Menino do Pijama Listrado", ano: 2008, sinopse: "Uma amizade improvável durante a Segunda Guerra.", pontuacao: 7.7 },
     { titulo: "Coração Valente", ano: 1995, sinopse: "Um guerreiro luta pela liberdade da Escócia.", pontuacao: 8.3 },
     { titulo: "Dunkirk", ano: 2017, sinopse: "Soldados aliados são evacuados da cidade de Dunkirk durante a Segunda Guerra.", pontuacao: 7.8 },
-    { titulo: 1917, ano: 2019, sinopse: "Dois soldados recebem uma missão quase impossível durante a Primeira Guerra Mundial.", pontuacao: 8.2 },
+    { titulo: "1917", ano: 2019, sinopse: "Dois soldados recebem uma missão quase impossível durante a Primeira Guerra Mundial.", pontuacao: 8.2 },
     { titulo: "Até o Último Homem", ano: 2016, sinopse: "Um médico de guerra se recusa a portar armas, mas salva dezenas de soldados na Batalha de Okinawa.", pontuacao: 8.1 },
     { titulo: "Sniper Americano", ano: 2014, sinopse: "A história real de Chris Kyle, o atirador mais letal da história militar dos EUA.", pontuacao: 7.3 },
     { titulo: "O Destino de Uma Nação", ano: 2017, sinopse: "Winston Churchill enfrenta sua maior decisão enquanto a Inglaterra está prestes a cair na guerra.", pontuacao: 7.4 },
@@ -936,7 +1206,6 @@
     { titulo: "A Barraca do Beijo 2", ano: 2020, sinopse: "Continuação das aventuras de Elle e Noah.", pontuacao: 5.4 },
     { titulo: "A Barraca do Beijo 3", ano: 2021, sinopse: "O último verão de Elle e seus amigos antes da faculdade.", pontuacao: 5.1 },
     { titulo: "Apenas Uma Chance", ano: 2010, sinopse: "Um jovem tenta conquistar a garota dos seus sonhos.", pontuacao: 6.3 },
-    { titulo: "Amor em Obras", ano: 2019, sinopse: "Mulher se muda para uma cidade pequena e encontra o amor.", pontuacao: 6.0 },
     { titulo: "Amor à Distância", ano: 2010, sinopse: "Casal enfrenta desafios de um relacionamento à distância.", pontuacao: 6.3 },
     { titulo: "Amor em Tempos de Guerra", ano: 2019, sinopse: "Um romance proibido durante a Segunda Guerra Mundial.", pontuacao: 7.0 },
     { titulo: "Todo Tempo Que Temos", ano: 2024, sinopse: "Almut e Tobias são unidos por um encontro surpresa que muda suas vidas.", pontuacao: 7.0 },
@@ -1066,7 +1335,7 @@
       { titulo: "Te Peguei!", ano: 2000, sinopse: "Desde a primeira série na escola, um grupo de cinco amigos tem um hábito curioso que realiza pelo menos uma vez ao ano: brincar enlouquecidamente de pega-pega, correndo em uma competição alucinante para ser o último homem de pé ao final da brincadeira, arriscando seus empregos e relacionamentos.", pontuacao: 7.5 },
       { titulo: "A Noite do Jogo", ano: 2018, sinopse: "Max e Annie participam de um grupo de casais que organiza noites de jogos. Brooks, que é irmão de Max, chega e decide organizar uma festa com os temas de assassinato e mistério. No entanto, Brooks é sequestrado de verdade, mas o grupo acredita que tudo faz parte da misteriosa brincadeira.", pontuacao: 7.2 },
       { titulo: "Agente 86", ano: 2008, sinopse: "Um ataque à sede da CONTROLE faz com que Maxwell Smart (Steve Carell) seja enfim promovido a agente, ganhando o código 86. Agora, juntamente com a agente 99 (Anne Hathaway), ele precisa encontrar os vilões da KAOS e encerrar seus planos.", pontuacao: 5.8 },
-      { titulo: "O Pequenino", ano: 2000, sinopse: "txt", pontuacao: 8.8 },
+      { titulo: "O Pequenino", ano: 2000, sinopse: "Um criminoso anão se disfarça de bebê para recuperar um diamante roubado, causando confusões hilárias.", pontuacao: 5.9 },
       { titulo: "nome", ano: 2000, sinopse: "Um agente do FBI é encolhido e se infiltra em uma gangue de criminosos para recuperar um microchip roubado.", pontuacao: 5.6 },
       { titulo: "Vovó... Zona", ano: 2000, sinopse: "Um agente do FBI se disfarça de uma avó para proteger uma testemunha em um caso de assassinato.", pontuacao: 5.2 },
       { titulo: "Debi & Loide", ano: 1994, sinopse: "Dois amigos desajustados embarcam em uma viagem para devolver uma maleta perdida.", pontuacao: 7.3 },
@@ -1086,34 +1355,39 @@
       { titulo: "Um Milhão de Maneiras de Pegar na Pistola", ano: 2014, sinopse: "Um fazendeiro covarde aprende a ser corajoso no Velho Oeste.", pontuacao: 6.1 },
       { titulo: "Ano Um", ano: 2009, sinopse: "Dois homens da pré-história embarcam em uma jornada pelo mundo antigo.", pontuacao: 4.9 },
       { titulo: "O Retorno de Johnny English", ano: 2011, sinopse: "O atrapalhado espião Johnny English retorna para uma nova missão.", pontuacao: 6.3 },
-      { titulo: "The Ridiculous Six", ano: 2015, sinopse: "Seis irmãos improváveis embarcam em uma aventura no Velho Oeste.", pontuacao: 4.8 },
+      { titulo: "Os Seis Ridículos", ano: 2015, sinopse: "Seis irmãos improváveis embarcam em uma aventura no Velho Oeste.", pontuacao: 4.8 },
       { titulo: "Cruella", ano: 2021, sinopse: "A origem da icônica vilã Cruella de Vil no mundo da moda londrina.", pontuacao: 7.3 }
 
-     ]
+    ]
 
     };
-
+// Função para buscar filmes por gênero
     const canvas = document.getElementById('roulette');
     const ctx = canvas.getContext('2d');
-
+// Configurações do canvas
     const genres = [
-  "Comédia romântica", "Ação", "Aventura", "Drama", "Comédia de terror",
-  "Terror", "Fantasia", "Filmes de guerra", "Romance", "Animação",
-  "Ficção Científica", "Filme de Comédia", "Perdeu a vez"
-];
+      "Comédia romântica", "Ação", "Aventura", "Drama", "Comédia de terror",
+      "Terror", "Fantasia", "Filmes de guerra", "Romance", "Animação",
+      "Ficção Científica", "Filme de Comédia", "Perdeu a vez"
+    ];
+// Cores para cada gênero
     const colors = genres.map((genre, index) => {
       if (genre === "Perdeu a vez") return '#FF4949';
-      if (genre === "Roda de novo") return '#FFC107';
       return index % 2 === 0 ? '#82121B' : '#D9AE62';
     });
-
+// Ângulo por segmento
     const anglePerSegment = (2 * Math.PI) / genres.length;
     let currentAngle = 0, isSpinning = false;
     let selectedGenre = null;
+    let movieList = [];
+    let isMovieSpinning = false;
 
+    // Achatar todos os filmes para pesquisa global
+    const allMovies = Object.values(data).flat();
+// Função para iniciar o seletor de filmes
     function populateGenreDropdown() {
       const dropdown = document.getElementById('genre-dropdown');
-      const validGenres = genres.filter(genre => genre !== 'Perdeu a vez' && genre !== 'Roda de novo');
+      const validGenres = genres.filter(genre => genre !== 'Perdeu a vez');
       validGenres.forEach(genre => {
         const link = document.createElement('a');
         link.href = '#';
@@ -1152,35 +1426,29 @@
       toggleDropdown();
     });
 
+    // Inicializa o desenho da roleta
     function drawRoulette(highlightGenre = null) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
       const radius = canvas.width / 2;
-
+// Desenha o círculo da roleta
       genres.forEach((genre, index) => {
         const startAngle = anglePerSegment * index + currentAngle;
         const endAngle = startAngle + anglePerSegment;
-
+// Desenha o segmento da roleta
         ctx.beginPath();
         ctx.moveTo(centerX, centerY);
         ctx.arc(centerX, centerY, radius, startAngle, endAngle);
         ctx.fillStyle = highlightGenre && genre !== highlightGenre ? '#444' : colors[index];
         ctx.fill();
-
+// Desenha o contorno do segmento
         ctx.save();
         ctx.translate(centerX, centerY);
         ctx.rotate(startAngle + anglePerSegment / 2);
-
-        // Troca a cor e o tamanho da fonte para "Perdeu a vez"
-        if (genre === "Perdeu a vez") {
-          ctx.fillStyle = '#fff200'; // Amarelo
-          ctx.font = 'bold 25px Arial'; // Fonte maior e em negrito
-        } else {
-          ctx.fillStyle = '#fff';
-          ctx.font = '20px Arial';
-        }
-
+// Desenha o texto do gênero
+        ctx.fillStyle = genre === "Perdeu a vez" ? '#fff200' : '#fff';
+        ctx.font = genre === "Perdeu a vez" ? 'bold 25px Arial' : '20px Arial';
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
         const lines = genre.split('\n');
@@ -1191,20 +1459,20 @@
         ctx.restore();
       });
     }
-
+// Inicializa o desenho da roleta
     function bumpArrow() {
       const arrow = document.querySelector('.arrow');
       arrow.classList.add('bumping');
       setTimeout(() => arrow.classList.remove('bumping'), 200);
     }
-
+   //inicialização do jogo
     function spinRoulette() {
       if (isSpinning) return;
       isSpinning = true;
       document.getElementById('spinButton').disabled = true;
       document.getElementById('roulette-buttons').style.display = 'none';
       document.getElementById('result').textContent = '';
-
+// Limpa o resultado anterior
       const spinDuration = 10000;
       const maxSpeed = 0.5;
       const accelerationTime = 1000;
@@ -1214,7 +1482,7 @@
       const targetAngle = extraRotations * 2 * Math.PI + (winningIndex * anglePerSegment);
 
       let startTime = null;
-
+// Função de animação para girar a roleta
       function animateSpin(timestamp) {
         if (!startTime) startTime = timestamp;
         const elapsed = timestamp - startTime;
@@ -1234,7 +1502,7 @@
           showResult(winningIndex);
           return;
         }
-
+// Atualiza o ângulo atual
         currentAngle += speed;
         drawRoulette();
         if (isSpinning) requestAnimationFrame(animateSpin);
@@ -1242,9 +1510,10 @@
 
       requestAnimationFrame(animateSpin);
     }
-
+// Função para exibir o resultado após o giro
     function showResult(winningIndex) {
       selectedGenre = genres[winningIndex];
+        document.getElementById('selected-genre').textContent = selectedGenre !== "Perdeu a vez" ? `Gênero: ${selectedGenre}` : '';
       currentAngle = winningIndex * anglePerSegment;
       currentAngle = ((currentAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
 
@@ -1257,21 +1526,17 @@
         document.getElementById('spinAgain').style.display = 'inline-block';
         document.getElementById('seeMovies').style.display = 'none';
         document.getElementById('roulette-buttons').style.display = 'flex';
-      } else if (selectedGenre === 'Roda de novo') {
-        setTimeout(spinRoulette, 1000);
       } else {
         document.getElementById('spinAgain').style.display = 'inline-block';
         document.getElementById('seeMovies').style.display = 'inline-block';
         document.getElementById('roulette-buttons').style.display = 'flex';
       }
     }
-
-    let movieList = [];
-    let isMovieSpinning = false;
-
+// Função para reiniciar o giro da roleta
     function startMovieSelector() {
       document.getElementById('roulette-container').style.opacity = '0';
       document.getElementById('movie-result').textContent = '';
+        document.getElementById('selected-genre').textContent = selectedGenre ? `Gênero: ${selectedGenre}` : '';
       setTimeout(() => {
         document.getElementById('roulette-container').style.display = 'none';
         document.getElementById('movie-selector-container').style.display = 'flex';
@@ -1285,11 +1550,13 @@
       spinMovieSelector();
     }
 
+    // Função para reiniciar o giro do filme
     function spinMovieSelector() {
       if (isMovieSpinning || !movieList.length) return;
       isMovieSpinning = true;
       document.getElementById('spinMovie').disabled = true;
       document.getElementById('spinMovieAgain').disabled = true;
+      document.getElementById('copy-title').disabled = false;
 
       const info = document.getElementById('movie-info');
       const title = document.getElementById('movie-title');
@@ -1297,6 +1564,8 @@
       const score = document.getElementById('movie-score');
       const synopsis = document.getElementById('movie-synopsis');
       const watchedButton = document.getElementById('watched-button');
+      const copyBtn = document.getElementById('copy-title');
+      const copyMsg = document.getElementById('copy-success-msg');
       info.classList.add('spinning');
 
       const watchedMovies = JSON.parse(localStorage.getItem('watchedMovies') || '[]');
@@ -1305,6 +1574,15 @@
         localStorage.setItem('watchedMovies', '[]');
         availableMovies = [...movieList];
       }
+// Redefinir os filmes assistidos se todos forem assistidos  
+      copyBtn.onclick = () => {
+        const titleText = title.textContent;
+        navigator.clipboard.writeText(titleText).then(() => {
+          copyMsg.textContent = 'Texto Copiado!';
+          copyMsg.classList.add('show');
+          setTimeout(() => copyMsg.classList.remove('show'), 2000);
+        });
+      };
 
       const spinDuration = 6000;
       const interval = 100;
@@ -1348,6 +1626,7 @@
       }, interval);
     }
 
+    // Função para alternar o estado de assistido
     function toggleWatched(title) {
       const watchedMovies = JSON.parse(localStorage.getItem('watchedMovies') || '[]');
       const index = watchedMovies.indexOf(title);
@@ -1364,6 +1643,7 @@
       localStorage.setItem('watchedMovies', JSON.stringify(watchedMovies));
     }
 
+    // Função para reiniciar o giro do filme
     function backToRoulette() {
       document.getElementById('movie-selector-container').style.opacity = '0';
       setTimeout(() => {
@@ -1373,34 +1653,131 @@
         document.getElementById('result').textContent = '';
         document.getElementById('roulette-buttons').style.display = 'none';
         document.getElementById('menuToggle').checked = false;
+        document.getElementById('search-movie').value = '';
+        document.getElementById('movie-suggestions').style.display = 'none';
         drawRoulette();
       }, 500);
     }
 
+    // função para definir o tema
     function setTheme(theme) {
-  document.body.classList.remove('light-theme', 'custom-theme');
-  if (theme === 'light') {
-    document.body.classList.add('light-theme');
-  } else if (theme === 'custom') {
-    document.body.classList.add('custom-theme');
-  }
-  localStorage.setItem('theme', theme);
+      document.body.classList.remove('light-theme', 'custom-theme');
+      if (theme === 'light') {
+        document.body.classList.add('light-theme');
+      } else if (theme === 'custom') {
+        document.body.classList.add('custom-theme');
+      }
+      localStorage.setItem('theme', theme);
+    }
 
-  // Se quiser manter customizações extras, pode deixar aqui:
-  if (theme === 'custom') {
-    document.documentElement.style.setProperty('--bg-gradient', 'linear-gradient(120deg, #1a237e, #3f51b5, #7986cb, #b3e5fc)');
-    document.documentElement.style.setProperty('--button-bg', 'linear-gradient(45deg, #d81b60, #ff4081)');
-    document.documentElement.style.setProperty('--card-border', '#ff4081');
-    document.documentElement.style.setProperty('--title-color', '#ff4081');
-    document.documentElement.style.setProperty('--title-shadow', '0 0 5px #ff4081, 0 0 10px #ff4081');
+    const searchInput = document.getElementById('search-movie');
+    const searchBtn = document.getElementById('search-movie-btn');
+    const suggestionBox = document.getElementById('movie-suggestions');
+
+    // Função para atualizar os resultados da pesquisa
+    function updateSearchResults(query, movies) {
+  suggestionBox.innerHTML = '';
+  if (!query) {
+    suggestionBox.style.display = 'none';
+    return;
+  }
+
+  let suggestions;
+  // Se digitar só "@", mostra todos os filmes
+  if (query === '@') {
+    suggestions = movies.slice(0, 100);
+  }
+  // Se digitar "@x", mostra filmes que começam com "x" (ignorando espaços antes do título)
+  else if (query.startsWith('@') && query.length > 1) {
+    const firstChar = query[1].toLowerCase();
+    suggestions = movies.filter(movie =>
+      movie.titulo &&
+      movie.titulo.trim().charAt(0).toLowerCase() === firstChar
+    ).slice(0, 100);
+  }
+  // Busca normal (qualquer parte do título)
+  else {
+    suggestions = movies.filter(movie =>
+      movie.titulo.toLowerCase().includes(query.toLowerCase())
+    ).slice(0, 8);
+  }
+
+  if (suggestions.length) {
+    suggestions.forEach(movie => {
+      const item = document.createElement('div');
+      item.textContent = movie.titulo;
+      item.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        searchInput.value = movie.titulo;
+        suggestionBox.style.display = 'none';
+        displayMovie(movie);
+      });
+      item.addEventListener('mouseover', () => item.style.background = '#444');
+      item.addEventListener('mouseout', () => item.style.background = 'none');
+      suggestionBox.appendChild(item);
+    });
+    suggestionBox.style.display = 'block';
   } else {
-    document.documentElement.style.removeProperty('--bg-gradient');
-    document.documentElement.style.removeProperty('--button-bg');
-    document.documentElement.style.removeProperty('--card-border');
-    document.documentElement.style.removeProperty('--title-color');
-    document.documentElement.style.removeProperty('--title-shadow');
+    suggestionBox.style.display = 'none';
   }
 }
+
+   // Função para exibir o filme selecionado
+    function displayMovie(movie) {
+      const isMovieSection = document.getElementById('movie-selector-container').style.display !== 'none';
+      if (!isMovieSection) {
+        document.getElementById('roulette-container').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('roulette-container').style.display = 'none';
+          document.getElementById('movie-selector-container').style.display = 'flex';
+          document.getElementById('movie-selector-container').style.opacity = '1';
+        }, 500);
+      }
+      const title = document.getElementById('movie-title');
+      const year = document.getElementById('movie-year');
+      const score = document.getElementById('movie-score');
+      const synopsis = document.getElementById('movie-synopsis');
+      const watchedButton = document.getElementById('watched-button');
+      const card = document.getElementById('movie-card');
+      const watchedMovies = JSON.parse(localStorage.getItem('watchedMovies') || '[]');
+
+      title.textContent = movie.titulo;
+      year.textContent = `Ano: ${movie.ano}`;
+      score.textContent = movie.pontuacao ? `Pontuação: ${movie.pontuacao}/10` : '';
+      synopsis.textContent = movie.sinopse;
+      document.getElementById('movie-result').innerHTML = `Filme escolhido: <span>${movie.titulo}</span>`;
+      watchedButton.classList.toggle('watched', watchedMovies.includes(movie.titulo));
+      watchedButton.textContent = watchedMovies.includes(movie.titulo) ? 'Assistido' : 'Já Assistido';
+      watchedButton.setAttribute('aria-label', `Marcar ${movie.titulo} como assistido`);
+      watchedButton.onclick = () => toggleWatched(movie.titulo);
+      card.classList.add('selected');
+      document.getElementById('copy-title').disabled = false;
+    }
+
+    searchInput.addEventListener('input', () => {
+      const query = searchInput.value.trim();
+      const isMovieSection = document.getElementById('movie-selector-container').style.display !== 'none';
+      updateSearchResults(query, isMovieSection ? movieList : allMovies);
+    });
+
+    searchBtn.addEventListener('click', () => {
+      const query = searchInput.value.trim().toLowerCase();
+      if (!query) return;
+      const isMovieSection = document.getElementById('movie-selector-container').style.display !== 'none';
+      const movies = isMovieSection ? movieList : allMovies;
+      const found = movies.find(movie => movie.titulo.toLowerCase().includes(query));
+      if (found) {
+        displayMovie(found);
+      } else {
+        document.getElementById('movie-result').innerHTML = `<span style="color: #d32f2f;">Filme não encontrado.</span>`;
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!suggestionBox.contains(e.target) && e.target !== searchInput) {
+        suggestionBox.style.display = 'none';
+      }
+    });
 
     const savedTheme = localStorage.getItem('theme') || 'dark';
     setTheme(savedTheme);
@@ -1411,6 +1788,7 @@
       document.getElementById('menuToggle').checked = false;
     });
 
+    // Adiciona os ouvintes de eventos para os botões
     document.getElementById('spinButton').addEventListener('click', spinRoulette);
     document.getElementById('spinAgain').addEventListener('click', spinRoulette);
     document.getElementById('seeMovies').addEventListener('click', startMovieSelector);
