@@ -1578,7 +1578,7 @@
       copyBtn.onclick = () => {
         const titleText = title.textContent;
         navigator.clipboard.writeText(titleText).then(() => {
-          copyMsg.textContent = 'Texto Copiado!';
+          copyMsg.textContent = 'Nome Copiado!';
           copyMsg.classList.add('show');
           setTimeout(() => copyMsg.classList.remove('show'), 2000);
         });
